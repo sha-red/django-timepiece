@@ -151,7 +151,7 @@ class Project(models.Model):
 
     class Meta:
         db_table = 'timepiece_project'  # Using legacy table name.
-        ordering = ('name', 'status', 'type',)
+        ordering = ('business__short_name', 'name', 'status', 'type',)
         permissions = (
             ('view_project', 'Can view project'),
             ('email_project_report', 'Can email project report'),
@@ -161,7 +161,7 @@ class Project(models.Model):
         )
 
     def __str__(self):
-        return '{0} ({1})'.format(self.name, self.business.get_display_name())
+        return '{1}: {0}'.format(self.name, self.business.get_display_name())
 
     @property
     def billable(self):

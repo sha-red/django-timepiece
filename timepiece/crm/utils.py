@@ -11,7 +11,10 @@ from timepiece.utils import add_timezone, get_hours_summary, get_week_start
 def daily_summary(day_entries):
     projects = {}
     all_day = {}
-    for name, entries in groupby(day_entries, lambda x: x['project__name']):
+    for name, entries in groupby(day_entries,
+                                 lambda x: "{}: {}".format(
+                                    x['project__business__short_name'],
+                                    x['project__name'])):
         hours = get_hours_summary(entries)
         projects[name] = hours
         for key in hours.keys():
@@ -30,8 +33,9 @@ def grouped_totals(entries):
     weekly = entries.extra(select=select["week"]).values('date', 'billable')
     weekly = weekly.annotate(hours=Sum('hours')).order_by('date')
     daily = entries.extra(select=select["day"]).values('date', 'project__name',
-                                                       'billable')
+                                                       'billable', 'project__business__short_name')
     daily = daily.annotate(hours=Sum('hours')).order_by('date',
+                                                        'project__business__short_name',
                                                         'project__name')
     weeks = {}
     for week, week_entries in groupby(weekly, lambda x: x['date']):
