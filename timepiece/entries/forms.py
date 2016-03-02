@@ -8,13 +8,29 @@ from selectable import forms as selectable
 
 from timepiece import utils
 from timepiece.crm.models import Project, ProjectRelationship
-from timepiece.entries.models import Entry, Location, ProjectHours
+from timepiece.entries.models import Entry, Location, ProjectHours, Activity
 from timepiece.entries.lookups import ActivityLookup
 from timepiece.forms import (
     INPUT_FORMATS, TimepieceSplitDateTimeField, TimepieceDateInput)
 
 
-class ClockInForm(forms.ModelForm):
+class ActivityMixin(object):
+    def __init__(self, *args, **kwargs):
+        super(ActivityMixin, self).__init__(*args, **kwargs)
+        self.fields['activity'].required = False
+
+    def clean_activity(self):
+        """
+        Auto-create new activity.
+        """
+        activity = self.cleaned_data.get('activity')
+        activity_text = self.data['activity_0']
+        if not activity and activity_text:
+            activity, is_new = Activity.objects.get_or_create(name=activity_text, code=activity_text.lower()[:5])
+        return activity
+
+
+class ClockInForm(ActivityMixin, forms.ModelForm):
     active_comment = forms.CharField(
         label='Notes for the active entry', widget=forms.Textarea,
         required=False)
@@ -119,7 +135,7 @@ class ClockOutForm(forms.ModelForm):
         return entry
 
 
-class AddUpdateEntryForm(forms.ModelForm):
+class AddUpdateEntryForm(ActivityMixin, forms.ModelForm):
     start_time = TimepieceSplitDateTimeField()
     end_time = TimepieceSplitDateTimeField()
 
