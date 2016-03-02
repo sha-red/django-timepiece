@@ -177,7 +177,7 @@ class Entry(models.Model):
 
     user = models.ForeignKey(User, related_name='timepiece_entries')
     project = models.ForeignKey('crm.Project', related_name='entries')
-    activity = models.ForeignKey(Activity, related_name='entries')
+    activity = models.ForeignKey(Activity, related_name='entries', blank=True, null=True, on_delete=models.SET_NULL)
     location = models.ForeignKey(Location, related_name='entries')
     entry_group = models.ForeignKey(
         'contracts.EntryGroup', blank=True, null=True, related_name='entries',
