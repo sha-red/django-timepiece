@@ -33,7 +33,13 @@ def change_status_action(modeladmin, request, queryset):
         form = ChangeStatusForm(request.POST)
         if form.is_valid():
             chosen_status = form.cleaned_data['status']
-            count = queryset.update(status=chosen_status)
+            # Doesn't work, query is to complex:
+            # count = queryset.update(status=chosen_status)
+            count = 0
+            for obj in queryset.all():
+                obj.status = chosen_status
+                obj.save()
+                count += 1
             message = ungettext(
                 'Successfully set %(count)d entry to %(chosen_status)s.',
                 'Successfully set %(count)d entries to %(chosen_status)s.',
